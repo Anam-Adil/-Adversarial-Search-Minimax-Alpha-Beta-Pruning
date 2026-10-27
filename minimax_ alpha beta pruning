@@ -1,0 +1,115 @@
+import math
+
+# Task 2: Minimax with leaf counter
+def minimax(depth, index, max_turn, scores, target, count):
+
+    if depth == target:
+        count[0] += 1
+        return scores[index]
+
+    if max_turn:
+        left = minimax(depth + 1, index * 2, False,
+                       scores, target, count)
+        right = minimax(depth + 1, index * 2 + 1, False,
+                        scores, target, count)
+        return max(left, right)
+
+    else:
+        left = minimax(depth + 1, index * 2, True,
+                       scores, target, count)
+        right = minimax(depth + 1, index * 2 + 1, True,
+                        scores, target, count)
+        return min(left, right)
+
+
+# Alpha-Beta pruning with leaf counter
+def alphabeta(depth, index, max_turn, scores,
+              target, alpha, beta, count):
+
+    if depth == target:
+        count[0] += 1
+        return scores[index]
+
+    if max_turn:
+        value = float('-inf')
+
+        for i in range(2):
+            result = alphabeta(
+                depth + 1, index * 2 + i, False,
+                scores, target, alpha, beta, count
+            )
+
+            value = max(value, result)
+            alpha = max(alpha, value)
+
+            if alpha >= beta:
+                break
+
+        return value
+
+    else:
+        value = float('inf')
+
+        for i in range(2):
+            result = alphabeta(
+                depth + 1, index * 2 + i, True,
+                scores, target, alpha, beta, count
+            )
+
+            value = min(value, result)
+            beta = min(beta, value)
+
+            if alpha >= beta:
+                break
+
+        return value
+
+
+# Task 2: Test both algorithms
+
+scores = [3, 5, 2, 9, 0, 7]
+target = math.ceil(math.log2(len(scores)))
+
+# Complete the binary tree
+scores += [0] * (2 ** target - len(scores))
+
+m_count = [0]
+m_value = minimax(0, 0, True, scores, target, m_count)
+
+a_count = [0]
+a_value = alphabeta(
+    0, 0, True, scores, target,
+    float('-inf'), float('inf'), a_count
+)
+
+print("Minimax value:", m_value)
+print("Minimax leaves evaluated:", m_count[0])
+print("Alpha-Beta value:", a_value)
+print("Alpha-Beta leaves evaluated:", a_count[0])
+
+
+# Task 3 
+original = [3, 5, 2, 9, 0, 7, 0, 0]
+reordered = [3, 5, 2, 9, 0, 0, 0, 7]
+
+target = int(math.log2(len(original)))
+
+for scores in [original, reordered]:
+
+    m_count = [0]
+    a_count = [0]
+
+    m_value = minimax(
+        0, 0, True, scores, target, m_count
+    )
+
+    a_value = alphabeta(
+        0, 0, True, scores, target,
+        float('-inf'), float('inf'), a_count
+    )
+
+    print("\nLeaf scores:", scores)
+    print("Minimax value:", m_value)
+    print("Minimax leaves evaluated:", m_count[0])
+    print("Alpha-Beta value:", a_value)
+    print("Alpha-Beta leaves evaluated:", a_count[0])
